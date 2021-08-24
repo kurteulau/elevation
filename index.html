@@ -21,12 +21,33 @@
       bottom: 0;
       width: 100%;
     }
+
+    .eleInfo {
+    position: absolute;
+    font-family: Arial, sans-serif;
+    margin-top: 5px;
+    margin-left: 5px;
+    padding: 5px;
+    width: 200px;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-size: 20px;
+    color: #222;
+    background-color: rgba(255, 255, 255, 0.8);
+    overflow: auto;
+}
+
   </style>
 </head>
 
 <body>
 
   <div id='map'></div>
+  <div class="eleInfo">
+    <div>Longitude: <span id='lng'></span></div>
+    <div>Latitude: <span id='lat'></span></div>
+    <div>Elevation: <span id='ele'></span></div>
+  </div>
 
   <script>
     mapboxgl.accessToken = 'pk.eyJ1Ijoia3VydGV1bGF1IiwiYSI6ImNrc292eWllcjAzdXAydnFsenZ3NDEweGMifQ.QxOOXtsElkae0VlPJ_6iJg';
@@ -36,8 +57,47 @@
       center: [-122.43877, 37.75152], // Specify the starting position [lng, lat]
       zoom: 11.5 // Specify the starting zoom
     });
-  </script>
 
+    // Create variables for the latitude and longitude
+    var lng;
+    var lat;
+    var lngDisplay = document.getElementById('lng');
+    var latDisplay = document.getElementById('lat');
+    var eleDisplay = document.getElementById('ele');
+
+    function getElevation() {
+    // Construct the API request
+    var query = 'https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2/tilequery/' + lng + ',' + lat + '.json?layers=contour&limit=50&access_token=' + mapboxgl.accessToken;
+    $.ajax({
+        method: 'GET',
+        url: query,
+    }).done(function(data) {
+        // Display the longitude and latitude values
+        lngDisplay.textContent = lng.toFixed(2);
+        latDisplay.textContent = lat.toFixed(2);
+        // Get all the returned features
+        var allFeatures = data.features;
+        // Create an empty array to add elevation data to
+        var elevations = [];
+        // For each returned feature, add elevation data to the elevations array
+        for (i = 0; i < allFeatures.length; i++) {
+        elevations.push(allFeatures[i].properties.ele);
+        }
+        // In the elevations array, find the largest value
+        var highestElevation = Math.max(...elevations);
+        // Display the largest elevation value
+        eleDisplay.textContent = highestElevation + ' meters';
+    });
+    }
+
+        map.on('click', function(e) {
+        lng = e.lngLat.lng;
+        lat = e.lngLat.lat;
+
+        getElevation();
+        });
+
+  </script>
 </body>
 
 </html>    
