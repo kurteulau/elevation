@@ -90,12 +90,17 @@
     });
     }
 
-        map.on('click', function(e) {
-        lng = e.lngLat.lng;
-        lat = e.lngLat.lat;
+    var marker = new mapboxgl.Marker({
+    'color': '#314ccd'
+    });
 
-        getElevation();
-        });
+
+    map.on('click', function(e) {
+    lng = e.lngLat.lng;
+    lat = e.lngLat.lat;
+    marker.setLngLat(e.lngLat).addTo(map);
+    getElevation();
+    });
 
   </script>
 </body>
